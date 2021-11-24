@@ -1,0 +1,19 @@
+00011100001
+counter increases which means that it is reading that clock is changing,
+wait for clock to go low, read data, increment count, wait for clock to go high
+clock goes low, reads data, data is 1, data stays at 1 even though actual signal changes
+data stays high, does not go low
+counter implies that its reading the clock, but when we output the reading on the clock pin..
+clk pin starts high, then goes low and stays low, even though clk pin goes back up to high
+after key press
+On the other hand data stays high
+Send LED array
+-need to figure out which pin is load, which pin is MOSI, which pin is SCK. Then check on oscilloscope.
+-load pin is PB5 (testSPI.c)
+-SCK is PA5 (going to need to change pin for keyboard)
+-PA7 is MOSI 
+In addition to array being sent, array needs to be constantly 
+sent while processing, and then processing needs to be interrupted by
+keyboard and that gets sent to array
+So next step is sending array while processing
+01010101

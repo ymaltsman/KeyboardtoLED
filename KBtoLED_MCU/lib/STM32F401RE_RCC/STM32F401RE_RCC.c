@@ -18,7 +18,8 @@ void configurePLL() {
     RCC->PLLCFGR.PLLM = 8;
     RCC->PLLCFGR.PLLN = 336;
     RCC->PLLCFGR.PLLP = 0b01; // divide by 4
-
+    RCC->PLLCFGR.PLLQ = 4;
+    
     // Enable PLL and wait until it's locked
     RCC->CR.PLLON = 1;
     while(RCC->CR.PLLRDY == 0);
