@@ -35,42 +35,17 @@ int main(void){
 
   // Load pin
   pinMode(GPIOB, LOAD_PIN, GPIO_OUTPUT);
-
-  //keyboard inputs
-  pinMode(GPIOA, K_CLK, GPIO_INPUT);
-  pinMode(GPIOA, K_DATA, GPIO_INPUT);
   
-  
-  int count = 0;
-  ps2_frame_t ps2_frame;
-
   //initialize LED array
   uint8_t LED0[N][3];
   uint8_t LED[N][3];
   uint8_t color[3] = {0xFF, 0xFF, 0xFF};
-  int x0;
-  float t = 100;
+  int x0 = 2;
+  float t = 1;
   init_LED(LED0, color);
   init_LED(LED, color);
-  sendLEDarray(LED);
   while(1){
-      if (count == 0) ps2_frame.raw = 0;
-      while(digitalRead(GPIOA, K_CLK)); //wait for clock signal to go low
-      ps2_frame.raw |= digitalRead(GPIOA, K_DATA) << count;
-      count++;
-      while(!digitalRead(GPIOA, K_CLK));
-      if (count == 11){
-          if (ps2_frame.data == 0x1C){
-              x0 = 1;
-          } else if (ps2_frame.data == 0x32){
-              x0 = 2;
-          } else if (ps2_frame.data == 0x21){
-              x0 = 3;
-          }
-          count = 0;
-      }
       sendLEDarray(LED);
-      
       process_array(LED, LED0, x0, t);
       t = t + .01;
   }

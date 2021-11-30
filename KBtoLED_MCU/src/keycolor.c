@@ -1,13 +1,14 @@
 #include <stdio.h>
 #include <math.h>
 #include "STM32F401RE.h"
+#include "main.h"
 
 ////////////////////////////////////////////////
 // Constants
 ////////////////////////////////////////////////
 
 #define _USE_MATH_DEFINES
-#define N 7 //number of pixels in the strip
+#define N 1 //number of pixels in the strip
 #define BASE_COL 255 //base color
 
 #define LOAD_PIN    5 //PB
@@ -16,11 +17,9 @@
 
 void init_LED(uint8_t LED[N][3], uint8_t color[3]);
 void sendLEDarray(uint8_t LED[N][3]);
-void process_array(uint8_t LED[N][3], uint8_t LED0[N][3], int x, float t);
-double wave_function(int x, int x0, float t);
 
 int main(void){
-    // Configure flash latency and set clock to run at 84 MHz
+     // Configure flash latency and set clock to run at 84 MHz
   configureFlash();
   configureClock();
 
@@ -43,16 +42,11 @@ int main(void){
   
   int count = 0;
   ps2_frame_t ps2_frame;
-
-  //initialize LED array
-  uint8_t LED0[N][3];
+  
+  //initialize LED array 
   uint8_t LED[N][3];
-  uint8_t color[3] = {0xFF, 0xFF, 0xFF};
-  int x0;
-  float t = 100;
-  init_LED(LED0, color);
-  init_LED(LED, color);
-  sendLEDarray(LED);
+  uint8_t color[3] = {0, 0, 0};
+
   while(1){
       if (count == 0) ps2_frame.raw = 0;
       while(digitalRead(GPIOA, K_CLK)); //wait for clock signal to go low
@@ -61,36 +55,17 @@ int main(void){
       while(!digitalRead(GPIOA, K_CLK));
       if (count == 11){
           if (ps2_frame.data == 0x1C){
-              x0 = 1;
+              color[0] = 0xFF;
           } else if (ps2_frame.data == 0x32){
-              x0 = 2;
+              color[1] = 0xFF;
           } else if (ps2_frame.data == 0x21){
-              x0 = 3;
+              color[2] = 0xFF;
           }
           count = 0;
       }
+      init_LED(LED, color);
       sendLEDarray(LED);
-      
-      process_array(LED, LED0, x0, t);
-      t = t + .01;
   }
-}
-
-
-void process_array(uint8_t LED[N][3], uint8_t LED0[N][3], int x, float t){
-    int i;
-    for (i = 0; i < N; i++){
-        LED[i][0] = LED0[i][0] - wave_function(i, x, t)*BASE_COL;
-        LED[i][1] = LED0[i][1] - wave_function(i, x, t)*BASE_COL;
-        LED[i][2] = LED0[i][2] - wave_function(i, x, t)*BASE_COL;
-    }
-}
-
-double wave_function(int x, int x0, float t){
-    double u;
-    double k = (x-t-x0)*(x-t-x0);
-    u = (1/sqrt(4*M_PI*t))*exp(-k/(4*t));
-    return u;
 }
 
 void init_LED(uint8_t LED[N][3], uint8_t color[3]){ 
