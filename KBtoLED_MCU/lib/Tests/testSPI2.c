@@ -1,3 +1,7 @@
+//testing sending data to FPGA for N-pixels LED
+//strip. FPGA will then convert 
+//data to format for LEDs
+
 #include <stdio.h>
 #include <math.h>
 #include "STM32F401RE.h"
@@ -7,8 +11,8 @@
 ////////////////////////////////////////////////
 
 #define _USE_MATH_DEFINES
-#define N 7 //number of pixels in the strip
-#define BASE_COL 255 //base color
+#define N 5 //number of pixels in the strip
+#define BASE_COL 100 //base color
 
 #define LOAD_PIN    5 //PB
 
@@ -16,8 +20,6 @@
 
 void init_LED(uint8_t LED[N][3], uint8_t color[3]);
 void sendLEDarray(uint8_t LED[N][3]);
-void process_array(uint8_t LED[N][3], uint8_t LED0[N][3], int x, float t);
-double wave_function(int x, int x0, float t);
 
 int main(void){
     // Configure flash latency and set clock to run at 84 MHz
@@ -37,35 +39,14 @@ int main(void){
   pinMode(GPIOB, LOAD_PIN, GPIO_OUTPUT);
   
   //initialize LED array
-  uint8_t LED0[N][3];
   uint8_t LED[N][3];
-  uint8_t color[3] = {0xFF, 0xFF, 0xFF};
-  int x0 = 2;
-  float t = 1;
-  init_LED(LED0, color);
+  uint8_t color[3] = {100, 100, 100};
   init_LED(LED, color);
-  while(1){
-      sendLEDarray(LED);
-      process_array(LED, LED0, x0, t);
-      t = t + .01;
-  }
-}
+
+  //send LED array to FPGA
+  sendLEDarray(LED);
 
 
-void process_array(uint8_t LED[N][3], uint8_t LED0[N][3], int x, float t){
-    int i;
-    for (i = 0; i < N; i++){
-        LED[i][0] = LED0[i][0] - wave_function(i, x, t)*BASE_COL;
-        LED[i][1] = LED0[i][1] - wave_function(i, x, t)*BASE_COL;
-        LED[i][2] = LED0[i][2] - wave_function(i, x, t)*BASE_COL;
-    }
-}
-
-double wave_function(int x, int x0, float t){
-    double u;
-    double k = (x-t-x0)*(x-t-x0);
-    u = (1/sqrt(4*M_PI*t))*exp(-k/(4*t));
-    return u;
 }
 
 void init_LED(uint8_t LED[N][3], uint8_t color[3]){ 
@@ -83,16 +64,14 @@ void init_LED(uint8_t LED[N][3], uint8_t color[3]){
 void sendLEDarray(uint8_t LED[N][3]){
     int i;
 
-    int j;
     digitalWrite(GPIOB, LOAD_PIN, 1);
+
     for(i = 0; i<N; i++){
-        for(j = 0; j<3; j++){
-            
-            spiSendColor(LED[i][j]);
-            while(SPI1->SR.BSY); // Confirm all SPI transactions are completed
-            
-        }
+        spiSendColor(LED[i][0]);
+        spiSendColor(LED[i][1]);
+        spiSendColor(LED[i][2]);
     }
-    digitalWrite(GPIOB, LOAD_PIN, 0);
     
+    while(SPI1->SR.BSY); // Confirm all SPI transactions are completed
+    digitalWrite(GPIOB, LOAD_PIN, 0);
 }

@@ -35,13 +35,21 @@ int main(void){
 
   // Load pin
   pinMode(GPIOB, LOAD_PIN, GPIO_OUTPUT);
+
+  //keyboard inputs
+  pinMode(GPIOA, K_CLK, GPIO_INPUT);
+  pinMode(GPIOA, K_DATA, GPIO_INPUT);
   
+  
+  int count = 0;
+  ps2_frame_t ps2_frame;
+
   //initialize LED array
   uint8_t LED0[N][3];
   uint8_t LED[N][3];
   uint8_t color[3] = {0xFF, 0xFF, 0xFF};
   int x0 = 2;
-  float t = 1;
+  float t = 100;
   init_LED(LED0, color);
   init_LED(LED, color);
   while(1){

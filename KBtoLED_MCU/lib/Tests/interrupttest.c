@@ -9,6 +9,8 @@ int main(void) {
     pinMode(GPIOA, K_DATA, GPIO_INPUT);
     pinMode(GPIOA, SUCCESS_LED, GPIO_OUTPUT);
 
+    digitalWrite(GPIOA, SUCCESS_LED, 0);
+
     // TODO
     // 1. Enable SYSCFG clock domain in RCC
     RCC->APB2ENR |= (1 << 14);
@@ -19,22 +21,22 @@ int main(void) {
     //enable interrupts globally
     __enable_irq();
 
-    // TODO: Configure interrupt for falling edge of GPIO PA8
+    // TODO: Configure interrupt for falling edge of GPIO PA0
     // 1. Configure mask bit
     EXTI->IMR |= (1 << 5);
     // 2. Disable rising edge trigger
     EXTI->RTSR |= (0 << 5);
     // 3. Enable falling edge trigger
     EXTI->FTSR |= (1<<5);
-    // 4. Turn on EXTI interrupt in NVIC_ISER1
-    *NVIC_ISER1 = 1;
+    // 4. Turn on EXTI9-5 interrupt in NVIC_ISER0
+    *NVIC_ISER0 |= (1<<23);
 
     while(1){
         
     }
 }
 
-void EXTI3_IRQhandler(void){
+void EXTI9_5_IRQn_IRQhandler(void){
     digitalWrite(GPIOA, SUCCESS_LED, 1);
     // Check that EXTI_8 was what triggered our interrupt
     if (EXTI->PR & (1 << K_DATA)){
@@ -42,24 +44,21 @@ void EXTI3_IRQhandler(void){
         EXTI->PR |= (1 << K_DATA);
         
         // Then toggle the LED
-        uint8_t press = 0x00;
-        int i = 0;
-        int phase = 0;
-        int clk_state = digitalRead(GPIOA, K_CLK);
-        while(i < 9){
-            int new_clk = digitalRead(GPIOA, K_CLK);
-            if (clk_state != new_clk){
-                clk_state = new_clk;
-                if (phase == 1){
-                    i++;
-                    press |= (digitalRead(GPIOA, K_DATA) << (i-1));
-                }
-                phase = !phase;
+        int count = 0;
+        ps2_frame_t ps2_frame;
+        while(1){
+            if (count == 0) ps2_frame.raw = 0;
+            while(digitalRead(GPIOA, K_CLK)); //wait for clock signal to go low
+            ps2_frame.raw |= digitalRead(GPIOA, K_DATA) << count;
+            count++;
+            while(!digitalRead(GPIOA, K_CLK));
+            if (count == 11){
+                if (ps2_frame.data == 0x1C) digitalWrite(GPIOA, SUCCESS_LED, 1);
+                count = 0;
             }
-        };
-        //if (press == 0x40){
-            //digitalWrite(GPIOA, SUCCESS_LED, 1);
-        //}
+            
+        }
     }
 
 }
+
