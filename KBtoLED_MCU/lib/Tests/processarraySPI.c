@@ -40,14 +40,15 @@ int main(void){
   uint8_t LED0[N][3];
   uint8_t LED[N][3];
   uint8_t color[3] = {0xFF, 0xFF, 0xFF};
-  int x0 = 2;
-  float t = 1;
+  int x0 = 1;
+  float t = 0;
+  float dt = 0.01;
   init_LED(LED0, color);
   init_LED(LED, color);
   while(1){
       sendLEDarray(LED);
       process_array(LED, LED0, x0, t);
-      t = t + .01;
+      t = t + dt; //play around with time increment
   }
 }
 
@@ -61,10 +62,17 @@ void process_array(uint8_t LED[N][3], uint8_t LED0[N][3], int x, float t){
     }
 }
 
-double wave_function(int x, int x0, float t){
+double wave_function1(int x, int x0, float t){
     double u;
     double k = (x-t-x0)*(x-t-x0);
     u = (1/sqrt(4*M_PI*t))*exp(-k/(4*t));
+    return u;
+}
+
+double wave_function(int x, int x0, float t){
+    double w = 1;
+    double k = (x-t-x0)*(x-t-x0);
+    double u = exp(-k/(2*w*w));
     return u;
 }
 

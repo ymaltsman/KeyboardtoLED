@@ -11,7 +11,7 @@
 ////////////////////////////////////////////////
 
 #define _USE_MATH_DEFINES
-#define N 5 //number of pixels in the strip
+#define N 7 //number of pixels in the strip
 #define BASE_COL 100 //base color
 
 #define LOAD_PIN    5 //PB

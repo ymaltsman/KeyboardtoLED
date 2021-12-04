@@ -45,6 +45,20 @@ typedef struct {
   };
 } ps2_frame_t;
 
+typedef struct {
+  unsigned int data : 8;
+  unsigned int loc  : 8;
+  unsigned int color  : 8;
+} key;
+
+typedef struct {
+  unsigned int loc  : 8;
+  float t;
+  unsigned int green  : 8;
+  unsigned int red  : 8;
+  unsigned int blue : 8; 
+} press;
+
 ///////////////////////////////////////////////////////////////////////////////
 // IRQn_Type and __NVIC_PRIO_BITS from stm32f401xe.h
 ///////////////////////////////////////////////////////////////////////////////

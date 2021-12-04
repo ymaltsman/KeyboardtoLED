@@ -9,7 +9,7 @@ int main(void) {
     pinMode(GPIOA, K_DATA, GPIO_INPUT);
     pinMode(GPIOA, SUCCESS_LED, GPIO_OUTPUT);
 
-    digitalWrite(GPIOA, SUCCESS_LED, 0);
+    digitalWrite(GPIOA, SUCCESS_LED, 1);
 
     // TODO
     // 1. Enable SYSCFG clock domain in RCC
@@ -25,9 +25,9 @@ int main(void) {
     // 1. Configure mask bit
     EXTI->IMR |= (1 << 5);
     // 2. Disable rising edge trigger
-    EXTI->RTSR |= (0 << 5);
+    EXTI->RTSR |= (1 << 5);
     // 3. Enable falling edge trigger
-    EXTI->FTSR |= (1<<5);
+    EXTI->FTSR |= (0<<5);
     // 4. Turn on EXTI9-5 interrupt in NVIC_ISER0
     *NVIC_ISER0 |= (1<<23);
 
@@ -36,8 +36,8 @@ int main(void) {
     }
 }
 
-void EXTI9_5_IRQn_IRQhandler(void){
-    digitalWrite(GPIOA, SUCCESS_LED, 1);
+void EXTI9_5_IRQhandler(void){
+    digitalWrite(GPIOA, SUCCESS_LED, 0);
     // Check that EXTI_8 was what triggered our interrupt
     if (EXTI->PR & (1 << K_DATA)){
         // If so, clear the interrupt
