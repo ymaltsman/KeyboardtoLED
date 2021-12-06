@@ -22,7 +22,7 @@ that are relatively soon after each other
 
 #define READY_PIN 9 //PA9, CE for FPGA to send keypress over SPI
 #define DONE_PIN 6 //PB6, done signal for MCU to send FPGA when it finishes
-#define FPGA_FLAG 10 //PB10, flag from FPGA when it sends interrupt
+#define FPGA_FLAG 3 //PA3, flag from FPGA when it sends interrupt
 #define LOAD_PIN 5 //PB5, CE for sending color to FPGA
 
 #define MCK_FREQ 100000 //not sure what this is for, may take out
@@ -63,7 +63,7 @@ int main(void){
   pinMode(GPIOB, DONE_PIN, GPIO_OUTPUT); //configure done pin
   digitalWrite(GPIOB, DONE_PIN, 0);
   
-  pinMode(GPIOB, FPGA_FLAG, GPIO_INPUT); //configure flag
+  pinMode(GPIOA, FPGA_FLAG, GPIO_INPUT); //configure flag
   pinMode(GPIOA, READY_PIN, GPIO_OUTPUT);
   pinMode(GPIOB, LOAD_PIN, GPIO_OUTPUT);
   
@@ -75,17 +75,38 @@ int main(void){
   float t = 0;
   int x0;
   float dt = 0.5;
-  float end = 2;
+  float end = 3;
 
   init_LED(LED0, color);
   init_LED(LED, color);
 
   uint8_t data;
 
-  int test_mode = 1; //for debugging without the FPGA
-  
+  int test_mode; //for debugging without the FPGA
+  float test_counter = 0;
+
   while(1){
-      if (digitalRead(GPIOB, FPGA_FLAG)){
+      test_counter += .5;
+
+
+/* 
+        if (test_counter > .4 && test_counter < .6){
+        data = 0x1C;
+        x0 = keytoloc(keys, data);
+        presses[numpresses].loc = x0;
+        presses[numpresses].t = .01;
+        numpresses += 1;
+        } else if (test_counter > 1.4 && test_counter < 1.6){
+        data = 0x32;
+        x0 = keytoloc(keys, data);
+        presses[numpresses].loc = x0;
+        presses[numpresses].t = .01;
+        numpresses += 1;
+        }
+*/
+    
+/*
+      if (digitalRead(GPIOA, FPGA_FLAG)){
           if (numpresses == MAX_PRESSES){
               numpresses = 0;
           }
@@ -94,9 +115,11 @@ int main(void){
           presses[numpresses].loc = x0;
           presses[numpresses].t = .01;
           //can also initialize a random color here
+          numpresses += 1;
       }
-      process_presses(LED0, LED, presses, numpresses);
-      sendLEDarray(LED);
+*/      
+      //process_presses(LED0, LED, presses, numpresses);
+      //sendLEDarray(LED);
   }
 
   
@@ -111,7 +134,7 @@ uint8_t getkey(){
     digitalWrite(GPIOA, READY_PIN, 0);
           
     digitalWrite(GPIOB, DONE_PIN, 1);
-    while (digitalRead(GPIOB, FPGA_FLAG)); //wait for FPGA to lower interrupt flag
+    while (digitalRead(GPIOA, FPGA_FLAG)); //wait for FPGA to lower interrupt flag
     digitalWrite(GPIOB, DONE_PIN, 0);
     return data;
 }

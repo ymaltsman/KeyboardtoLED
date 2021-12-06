@@ -17,7 +17,7 @@ to FPGA based on input
 #define N 7 //number of pixels in the strip
 
 #define DONE_PIN 6 //PB6, done signal for MCU to send FPGA when it finishes
-#define FPGA_FLAG 10 //PB10, flag from FPGA when it sends interrupt
+#define FPGA_FLAG 3 //PA3, flag from FPGA when it sends interrupt
 #define LOAD_PIN 5 //PB
 #define Ready_PIN 9 //PA9, CE for FPGA to send keypress over SPI
 
@@ -44,7 +44,7 @@ int main(void){
     pinMode(GPIOB, DONE_PIN, GPIO_OUTPUT); //configure done pin
     digitalWrite(GPIOB, DONE_PIN, 0);
 
-    pinMode(GPIOB, FPGA_FLAG, GPIO_INPUT); //configure flag
+    pinMode(GPIOA, FPGA_FLAG, GPIO_INPUT); //configure flag
     pinMode(GPIOA, Ready_PIN, GPIO_OUTPUT); 
 
     //initialize LED array 
@@ -53,17 +53,17 @@ int main(void){
     
     uint8_t data;
     while(1){
-        if (digitalRead(GPIOB, FPGA_FLAG)){
+        if (digitalRead(GPIOA, FPGA_FLAG)){
             digitalWrite(GPIOA, Ready_PIN, 1);
             data = spiSendReceive(0);
             while(SPI1->SR.BSY);
             digitalWrite(GPIOA, Ready_PIN, 0);
 
-            digitalWrite(GPIOB, DONE_PIN, 1);
-            while (digitalRead(GPIOB, FPGA_FLAG)); //wait for FPGA to lower interrupt flag
+            digitalWrite(GPIOB, DONE_PIN, 1); //can also have FPGA lower it's interrupt flag on it's own
+            while (digitalRead(GPIOA, FPGA_FLAG)); //wait for FPGA to lower interrupt flag
             digitalWrite(GPIOB, DONE_PIN, 0);
 
-            if (data == 0x1C){
+            if (data == 0x1C){ 
                 color[0] = 0xFF;
             } else if (data == 0x32){
                 color[1] = 0xFF;

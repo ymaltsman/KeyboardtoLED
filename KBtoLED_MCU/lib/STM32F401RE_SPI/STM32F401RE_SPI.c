@@ -20,7 +20,7 @@ void spiInit(uint32_t br, uint32_t cpol, uint32_t cpha) {
     RCC->APB2ENR |= (1 << 12); // Turn on SPI1 clock domain (SPI1EN bit in APB2ENR)
 
     // Initially assigning SPI pins
-    pinMode(GPIOA, 5, GPIO_ALT); // PA5, Arduino D13, SPI1_SCK
+    pinMode(GPIOA, 5, GPIO_ALT); // PA5, Arduino D13, SPI1_SCK  
     pinMode(GPIOA, 6, GPIO_ALT); // PA6, Arduino D12, SPI1_MISO
     pinMode(GPIOA, 7, GPIO_ALT); // PA7, Arduino D11, SPI1_MOSI
     pinMode(GPIOB, 6, GPIO_OUTPUT); // PB6, Arduino D10, Manual CS
@@ -45,6 +45,26 @@ void spiInit(uint32_t br, uint32_t cpol, uint32_t cpha) {
     SPI1->CR1.MSTR = 1;     // Put SPI in master mode
     SPI1->CR1.SPE = 1;      // Enable SPI
 }
+
+void SPIslaveInit(uint32_t br, uint32_t cpol, uint32_t cpha){
+    // Turn on GPIOA and GPIOB clock domains (GPIOAEN and GPIOBEN bits in AHB1ENR)
+    RCC->AHB1ENR.GPIOAEN = 1;
+    RCC->AHB1ENR.GPIOBEN = 1;
+    
+    RCC->APB2ENR |= (1 << 12); // Turn on SPI1 clock domain (SPI1EN bit in APB2ENR)
+
+    SPI1->CR1.CPOL = cpol;  // Set the polarity
+    SPI1->CR1.CPHA = cpha;  // Set the phase
+    SPI1->CR1.LSBFIRST = 0; // Set least significant bit first
+    SPI1->CR1.DFF = 0;      // Set data format to 8 bits
+    SPI1->CR1.SSM = 0;      // Turn off software slave management
+    SPI1->CR2.SSOE = 1;     // Set the NSS pin to output mode
+    SPI1->CR1.MSTR = 0;     // Put SPI in master mode
+    SPI1->CR1.SPE = 1;      // Enable SPI
+
+
+}
+
 
 /* Transmits a character (1 byte) over SPI and returns the received character.
  *    -- send: the character to send over SPI

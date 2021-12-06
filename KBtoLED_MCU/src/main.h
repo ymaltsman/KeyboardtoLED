@@ -12,8 +12,14 @@
 // Custom defines
 ///////////////////////////////////////////////////////////////////////////////
 
-#define K_CLK 5
-#define K_DATA 0 // PA8
+
+#define _USE_MATH_DEFINES
+//#define N 7 //number of pixels in the strip
+#define M 2
+#define K 2
+#define LOAD_PIN 5
+#define K_CLK 0
+#define K_DATA 0 // PA0
 #define SUCCESS_LED 4
 #define DELAY_TIM TIM2
 
@@ -138,6 +144,8 @@ typedef enum
 } IRQn_Type;
 
 #define __NVIC_PRIO_BITS          4U       /*!< STM32F4XX uses 4 Bits for the Priority Levels */
+
+
 
 #include "cmsis_gcc.h"
 #include "core_cm4.h"

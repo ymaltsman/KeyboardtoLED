@@ -12,17 +12,19 @@
 
 #define _USE_MATH_DEFINES
 #define N 7 //number of pixels in the strip
+#define M 2
 #define BASE_COL 100 //base color
 
 #define LOAD_PIN    5 //PB
 
 #define MCK_FREQ 100000 //not sure what this is for, may take out
 
-void init_LED(uint8_t LED[N][3], uint8_t color[3]);
+void init_LED(uint8_t LED[M][N][3], uint8_t color[3]);
 void sendLEDarray(uint8_t LED[N][3]);
+void sendLEDmatrix(uint8_t LED[M][N][3]);
 
 int main(void){
-    // Configure flash latency and set clock to run at 84 MHz
+      // Configure flash latency and set clock to run at 84 MHz
   configureFlash();
   configureClock();
 
@@ -39,39 +41,48 @@ int main(void){
   pinMode(GPIOB, LOAD_PIN, GPIO_OUTPUT);
   
   //initialize LED array
-  uint8_t LED[N][3];
-  uint8_t color[3] = {0xFF, 0x00, 0x00};
+  uint8_t LED[M][N][3];
+  uint8_t color[3] = {0x00, 0x00, 0xFF};
 
   init_LED(LED, color);
 
   //send LED array to FPGA
-  sendLEDarray(LED);
-  while (1)
-  {
-      /* code */
-  }
-  
+  sendLEDmatrix(LED);
+  while(1){
 
+  }
 
 }
 
-void init_LED(uint8_t LED[N][3], uint8_t color[3]){ 
+void init_LED(uint8_t LED[M][N][3], uint8_t color[3]){ 
     //initialize LED array to be the same color
     int i;
+    int j;
+    for (j = 0; j< M; j++){
+        for (i = 0; i < N; i++){
+            LED[j][i][0] = color[0];
+            LED[j][i][1] = color[1];
+            LED[j][i][2] = color[2];
+        }
 
-    for (i = 0; i < N; i++){
-        LED[i][0] = color[0];
-        LED[i][1] = color[1];
-        LED[i][2] = color[2];
     }
 
+}
+
+void sendLEDmatrix(uint8_t LED[M][N][3]){
+    int k;
+    digitalWrite(GPIOB, LOAD_PIN, 1);
+    for (k = 0; k< M; k++){
+        sendLEDarray(LED[k]);
+    }
+    digitalWrite(GPIOB, LOAD_PIN, 0);
 }
 
 void sendLEDarray(uint8_t LED[N][3]){
     int i;
     //uint8_t send;
     int j;
-    digitalWrite(GPIOB, LOAD_PIN, 1);
+    //digitalWrite(GPIOB, LOAD_PIN, 1);
     for(i = 0; i<N; i++){
         for(j = 0; j<3; j++){
             
@@ -80,6 +91,6 @@ void sendLEDarray(uint8_t LED[N][3]){
             
         }
     }
-    digitalWrite(GPIOB, LOAD_PIN, 0);
+    //digitalWrite(GPIOB, LOAD_PIN, 0);
     
 }

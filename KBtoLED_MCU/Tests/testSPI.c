@@ -1,3 +1,7 @@
+//testing sending data to FPGA for N-pixels LED
+//strip. FPGA will then convert 
+//data to format for LEDs
+
 #include <stdio.h>
 #include <math.h>
 #include "STM32F401RE.h"
@@ -8,7 +12,9 @@
 
 #define _USE_MATH_DEFINES
 #define N 7 //number of pixels in the strip
-#define BASE_COL 255 //base color
+#define BASE_COL 100 //base color
+
+#define DELAY_MS    500
 
 #define LOAD_PIN    5 //PB
 
@@ -16,8 +22,15 @@
 
 void init_LED(uint8_t LED[N][3], uint8_t color[3]);
 void sendLEDarray(uint8_t LED[N][3]);
-void process_array(uint8_t LED[N][3], uint8_t LED0[N][3], int x, float t);
-double wave_function(int x, int x0, float t);
+void ms_delay(int ms);
+
+void ms_delay(int ms) {
+   while (ms-- > 0) {
+      volatile int x=1000;
+      while (x-- > 0)
+         __asm("nop");
+   }
+}
 
 int main(void){
     // Configure flash latency and set clock to run at 84 MHz
@@ -37,43 +50,23 @@ int main(void){
   pinMode(GPIOB, LOAD_PIN, GPIO_OUTPUT);
   
   //initialize LED array
-  uint8_t LED0[N][3];
   uint8_t LED[N][3];
-  uint8_t color[3] = {0xFF, 0xFF, 0xFF};
-  int x0 = 1;
-  float t = 0;
-  float dt = 0.01;
-  init_LED(LED0, color);
+  uint8_t color[3] = {0x00, 0xFF, 0x00};
+
   init_LED(LED, color);
-  while(1){
-      sendLEDarray(LED);
-      process_array(LED, LED0, x0, t);
-      t = t + dt; //play around with time increment
+
+  //send LED array to FPGA
+  sendLEDarray(LED);
+  while (1)
+  {
+      /*
+        ms_delay(100);
+        sendLEDarray(LED);
+      */
   }
-}
+  
 
 
-void process_array(uint8_t LED[N][3], uint8_t LED0[N][3], int x, float t){
-    int i;
-    for (i = 0; i < N; i++){
-        LED[i][0] = LED0[i][0] - wave_function(i, x, t)*BASE_COL;
-        LED[i][1] = LED0[i][1] - wave_function(i, x, t)*BASE_COL;
-        LED[i][2] = LED0[i][2] - wave_function(i, x, t)*BASE_COL;
-    }
-}
-
-double wave_function1(int x, int x0, float t){
-    double u;
-    double k = (x-t-x0)*(x-t-x0);
-    u = (1/sqrt(4*M_PI*t))*exp(-k/(4*t));
-    return u;
-}
-
-double wave_function(int x, int x0, float t){
-    double w = 1;
-    double k = (x-t-x0)*(x-t-x0);
-    double u = exp(-k/(2*w*w));
-    return u;
 }
 
 void init_LED(uint8_t LED[N][3], uint8_t color[3]){ 
@@ -90,7 +83,7 @@ void init_LED(uint8_t LED[N][3], uint8_t color[3]){
 
 void sendLEDarray(uint8_t LED[N][3]){
     int i;
-
+    //uint8_t send;
     int j;
     digitalWrite(GPIOB, LOAD_PIN, 1);
     for(i = 0; i<N; i++){

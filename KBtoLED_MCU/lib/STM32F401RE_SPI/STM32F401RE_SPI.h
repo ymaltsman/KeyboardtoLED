@@ -118,4 +118,5 @@ uint16_t spiSendReceive16(uint16_t send);
 
 void spiSendColor(uint8_t color); //sends an 8 bit color over SPI
 
+void SPIslaveInit(uint32_t br, uint32_t cpol, uint32_t cpha);
 #endif
