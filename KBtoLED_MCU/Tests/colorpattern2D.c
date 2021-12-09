@@ -104,6 +104,9 @@ int main(void){
 }
 
 process_matrix_color2(uint8_t color[3], uint8_t LED[M][N][3],uint8_t LED0[M][N][3],int x0,float t){
+    /*
+    Sends 
+    */
     int i;
     int j;
     int x;

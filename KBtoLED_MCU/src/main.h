@@ -15,13 +15,15 @@
 
 #define _USE_MATH_DEFINES
 //#define N 7 //number of pixels in the strip
-#define M 2
-#define K 2
-#define LOAD_PIN 5
-#define K_CLK 0
-#define K_DATA 0 // PA0
-#define SUCCESS_LED 4
-#define DELAY_TIM TIM2
+#define M 2 //number of strips
+#define K 2 //number of keys
+#define LOAD_PIN 5 //PB5, CE for sending LED data
+#define K_CLK 0  //PA0
+#define K_DATA 0 // PB0
+#define Ready_PIN 9 //PA9, CE for FPGA to send keypress over SPI
+#define FPGA_FLAG 8 //PA8, flag from FPGA when it sends interrupt
+
+#define SUCCESS_LED 4 //for testing
 
 #define NVIC_ISER0 ((uint32_t *) 0xE000E100UL)
 #define NVIC_ISER1 ((uint32_t *) 0xE000E104UL)

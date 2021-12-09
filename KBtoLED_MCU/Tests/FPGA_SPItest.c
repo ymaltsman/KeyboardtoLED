@@ -17,10 +17,10 @@ to FPGA based on input
 #define N 7 //number of pixels in the strip
 
 #define DONE_PIN 6 //PB6, done signal for MCU to send FPGA when it finishes
-#define FPGA_FLAG 3 //PA3, flag from FPGA when it sends interrupt
-#define LOAD_PIN 5 //PB
-#define Ready_PIN 9 //PA9, CE for FPGA to send keypress over SPI
-
+#define FPGA_FLAG 8 //PA3, flag from FPGA when it sends interrupt
+#define LOAD_PIN 5 //PB5/J13
+#define Ready_PIN 10 //PA9, CE for FPGA to send keypress over SPI
+//#define TEST_PIN 10
 
 #define MCK_FREQ 100000 //not sure what this is for, may take out
 
@@ -40,12 +40,16 @@ int main(void){
     spiInit(1, 0, 0);
 
     pinMode(GPIOA, Ready_PIN, GPIO_OUTPUT);
+    pinMode(GPIOA, FPGA_FLAG, GPIO_INPUT);
+    //pinMode(GPIOA, TEST_PIN, GPIO_OUTPUT);
     digitalWrite(GPIOA, Ready_PIN, 0);
 
     uint8_t data;
 
-    data = getsignal();
+    while(!digitalRead(GPIOA, FPGA_FLAG));
 
+    //digitalWrite(GPIOA, Ready_PIN, 1);
+    data = getsignal();
 
 
 
@@ -58,6 +62,6 @@ uint8_t getsignal(){
     data = spiSendReceive(0);
     while(SPI1->SR.BSY);
     digitalWrite(GPIOA, Ready_PIN, 0);
-
+    
     return data;
 }
